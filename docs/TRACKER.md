@@ -2,7 +2,7 @@
 
 Mapeia cada item registrado nos documentos do pacote à sua origem na transcrição (`TRANSCRICAO.md`) ou no código-fonte (`src/`, `prisma/`).
 
-**Estado deste arquivo:** cobre, por enquanto, os documentos já produzidos — `docs/adrs/ADR-001` a `ADR-007` e `docs/RFC.md`. Será estendido nos próximos passos com os itens de `docs/FDD.md` e `docs/PRD.md` assim que forem produzidos.
+**Estado deste arquivo:** cobre, por enquanto, os documentos já produzidos — `docs/adrs/ADR-001` a `ADR-007`, `docs/RFC.md` e `docs/FDD.md`. Será estendido com os itens de `docs/PRD.md` assim que for produzido.
 
 | ID | Documento | Tipo | Conteúdo (resumo) | Fonte | Localização |
 | --- | --- | --- | --- | --- | --- |
@@ -59,3 +59,34 @@ Mapeia cada item registrado nos documentos do pacote à sua origem na transcriç
 | RFC-OPEN-04 | `docs/RFC.md` | Restrição | Escalonamento para múltiplos workers — não decidido | TRANSCRICAO | [09:13] Diego |
 | RFC-RISK-01 | `docs/RFC.md` | Risco | Prazo de 3 sprints; Atlas espera entrega até fim do trimestre, risco de churn | TRANSCRICAO | [09:45]-[09:47] Marcos/Larissa |
 | RFC-RISK-02 | `docs/RFC.md` | Risco | Dependência de revisão de segurança da Sofia (mín. 2 dias úteis) antes do deploy | TRANSCRICAO | [09:46] Sofia |
+| FDD-DADOS-01 | `docs/FDD.md` | Restrição | Novas tabelas (`webhook_endpoint`, `webhook_outbox`, etc.) usam UUID como chave primária, padrão do projeto | TRANSCRICAO | [09:51] Larissa |
+| FDD-DADOS-02 | `docs/FDD.md` | Decisão | Payload do evento é snapshot renderizado no momento da inserção na outbox, não recalculado no envio | TRANSCRICAO | [09:51]-[09:52] Larissa/Diego/Bruno |
+| FDD-FLUXO-01 | `docs/FDD.md` | Fluxo | Inserção na outbox ocorre dentro da mesma transação de `changeStatus`; falha na inserção reverte a mudança de status | TRANSCRICAO | [09:40]-[09:41] Bruno/Diego |
+| FDD-FLUXO-02 | `docs/FDD.md` | Fluxo | Worker processa a outbox em lotes via polling de 2 segundos | TRANSCRICAO | [09:09] Diego |
+| FDD-FLUXO-03 | `docs/FDD.md` | Fluxo | Retry recalcula `next_attempt_at` conforme a progressão de backoff a cada falha | TRANSCRICAO | [09:15]-[09:17] Diego |
+| FDD-FLUXO-04 | `docs/FDD.md` | Fluxo | Evento esgotado vai para `webhook_dead_letter`; reprocessamento só via replay admin | TRANSCRICAO | [09:18] Diego |
+| FDD-CONTRATO-01 | `docs/FDD.md` | Requisito Funcional | `POST /webhooks` — cadastro de webhook, secret gerada e devolvida na criação | TRANSCRICAO | [09:31] Marcos |
+| FDD-CONTRATO-02 | `docs/FDD.md` | Requisito Funcional | `GET /webhooks` — listagem dos webhooks de um customer | TRANSCRICAO | [09:33] Bruno |
+| FDD-CONTRATO-03 | `docs/FDD.md` | Requisito Funcional | `PATCH /webhooks/:id` — edição de configuração de webhook | TRANSCRICAO | [09:33] Bruno |
+| FDD-CONTRATO-04 | `docs/FDD.md` | Requisito Funcional | `DELETE /webhooks/:id` — remoção de webhook | TRANSCRICAO | [09:33] Bruno |
+| FDD-CONTRATO-05 | `docs/FDD.md` | Requisito Funcional | `POST /webhooks/:id/rotate-secret` — rotação de secret com grace period de 24h | TRANSCRICAO | [09:21]-[09:22] Sofia |
+| FDD-CONTRATO-06 | `docs/FDD.md` | Requisito Funcional | `GET /webhooks/:id/deliveries` — histórico de entregas (payload, sucesso/falha, tempo de resposta) | TRANSCRICAO | [09:34]-[09:35] Marcos/Larissa |
+| FDD-CONTRATO-07 | `docs/FDD.md` | Requisito Funcional | `POST /admin/webhooks/dead-letter/:id/replay` — replay manual de DLQ, role ADMIN | TRANSCRICAO | [09:18], [09:35] Diego |
+| FDD-CONTRATO-08 | `docs/FDD.md` | Contrato | Payload do evento e headers de entrega (`X-Event-Id`, `X-Signature`, `X-Timestamp`, `X-Webhook-Id`) | TRANSCRICAO | [09:43]-[09:45] Diego/Sofia |
+| FDD-ERRO-01 | `docs/FDD.md` | Restrição | Matriz de erros do módulo usa prefixo `WEBHOOK_*`, seguindo o padrão de códigos existente | TRANSCRICAO | [09:28]-[09:29] Bruno/Larissa |
+| FDD-RESIL-01 | `docs/FDD.md` | Requisito Não Funcional | Timeout de 10s por tentativa de entrega HTTP | TRANSCRICAO | [09:42] Diego |
+| FDD-RESIL-02 | `docs/FDD.md` | Requisito Não Funcional | Progressão de backoff 1m/5m/30m/2h/12h | TRANSCRICAO | [09:17] Diego |
+| FDD-RESIL-03 | `docs/FDD.md` | Decisão | DLQ como fallback terminal, sem descarte de evento | TRANSCRICAO | [09:18] Diego |
+| FDD-OBS-01 | `docs/FDD.md` | Referência de código | Logger Pino reaproveitado pelo módulo webhooks e pelo worker | CODIGO | `src/shared/logger/index.ts` |
+| FDD-OBS-02 | `docs/FDD.md` | Referência de código | Lista de redação de logs (`redactPaths`) precisa incluir `*.secret`/`*.signature` | CODIGO | `src/shared/logger/index.ts` |
+| FDD-OBS-03 | `docs/FDD.md` | Referência de código | Correlação de requisições HTTP via `X-Request-Id` já gerado pelo request logger | CODIGO | `src/middlewares/request-logger.middleware.ts` |
+| FDD-DEP-01 | `docs/FDD.md` | Dependência | Node >= 20 (fetch nativo disponível para o worker) | CODIGO | `package.json` |
+| FDD-DEP-02 | `docs/FDD.md` | Dependência | Compatibilidade com roles `ADMIN`/`OPERATOR` do JWT existente | CODIGO | `src/middlewares/auth.middleware.ts` |
+| FDD-INT-01 | `docs/FDD.md` | Referência de código | `changeStatus` estendido para publicar evento na outbox dentro da mesma transação | CODIGO | `src/modules/orders/order.service.ts` |
+| FDD-INT-02 | `docs/FDD.md` | Referência de código | Novas classes de erro estendem `AppError`/subclasses HTTP existentes | CODIGO | `src/shared/errors/http-errors.ts` |
+| FDD-INT-03 | `docs/FDD.md` | Referência de código | Error middleware central não precisa de alteração para tratar erros `WEBHOOK_*` | CODIGO | `src/middlewares/error.middleware.ts` |
+| FDD-INT-04 | `docs/FDD.md` | Referência de código | `requireRole('ADMIN')` reaproveitado no endpoint de replay de DLQ | CODIGO | `src/middlewares/auth.middleware.ts` |
+| FDD-INT-05 | `docs/FDD.md` | Referência de código | Instância `logger` reaproveitada pelo worker fora do ciclo de request HTTP | CODIGO | `src/shared/logger/index.ts` |
+| FDD-INT-06 | `docs/FDD.md` | Referência de código | Worker cria `PrismaClient` próprio seguindo o padrão de `createPrismaClient()` | CODIGO | `src/config/database.ts` |
+| FDD-INT-07 | `docs/FDD.md` | Referência de código | Schemas Zod do módulo usam o middleware `validate` genérico existente | CODIGO | `src/middlewares/validate.middleware.ts` |
+| FDD-INT-08 | `docs/FDD.md` | Referência de código | Registro do novo módulo em `buildControllers`/`buildApiRouter`, mesmo padrão dos módulos existentes | CODIGO | `src/routes/index.ts` |
