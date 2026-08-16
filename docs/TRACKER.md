@@ -2,7 +2,7 @@
 
 Mapeia cada item registrado nos documentos do pacote à sua origem na transcrição (`TRANSCRICAO.md`) ou no código-fonte (`src/`, `prisma/`).
 
-**Estado deste arquivo:** cobre, por enquanto, os documentos já produzidos — `docs/adrs/ADR-001` a `ADR-007`, `docs/RFC.md` e `docs/FDD.md`. Será estendido com os itens de `docs/PRD.md` assim que for produzido.
+**Estado deste arquivo:** cobre os cinco documentos do pacote — `docs/adrs/ADR-001` a `ADR-007`, `docs/RFC.md`, `docs/FDD.md` e `docs/PRD.md`.
 
 | ID | Documento | Tipo | Conteúdo (resumo) | Fonte | Localização |
 | --- | --- | --- | --- | --- | --- |
@@ -90,3 +90,36 @@ Mapeia cada item registrado nos documentos do pacote à sua origem na transcriç
 | FDD-INT-06 | `docs/FDD.md` | Referência de código | Worker cria `PrismaClient` próprio seguindo o padrão de `createPrismaClient()` | CODIGO | `src/config/database.ts` |
 | FDD-INT-07 | `docs/FDD.md` | Referência de código | Schemas Zod do módulo usam o middleware `validate` genérico existente | CODIGO | `src/middlewares/validate.middleware.ts` |
 | FDD-INT-08 | `docs/FDD.md` | Referência de código | Registro do novo módulo em `buildControllers`/`buildApiRouter`, mesmo padrão dos módulos existentes | CODIGO | `src/routes/index.ts` |
+| PRD-OBJ-01 | `docs/PRD.md` | Requisito Não Funcional | Objetivo com métrica: P95 de latência de entrega < 10 segundos | TRANSCRICAO | [09:02] Marcos |
+| PRD-OBJ-02 | `docs/PRD.md` | Decisão | Objetivo com meta: entrega em produção até o fim do trimestre, 3 sprints | TRANSCRICAO | [09:45]-[09:47] Larissa/Marcos |
+| PRD-OBJ-03 | `docs/PRD.md` | Requisito Não Funcional | Objetivo de confiabilidade: janela de retry cobrindo até ~15h de indisponibilidade do cliente | TRANSCRICAO | [09:15]-[09:17] Diego |
+| PRD-OBJ-04 | `docs/PRD.md` | Requisito Não Funcional | Objetivo de consistência: zero divergência entre status do pedido e evento publicado | TRANSCRICAO | [09:40]-[09:41] Bruno/Diego |
+| PRD-ESCOPO-01 | `docs/PRD.md` | Restrição | Fora de escopo: notificação por e-mail em falha recorrente | TRANSCRICAO | [09:37]-[09:38] Marcos/Larissa |
+| PRD-ESCOPO-02 | `docs/PRD.md` | Restrição | Fora de escopo: dashboard visual para o cliente | TRANSCRICAO | [09:39]-[09:40] Marcos/Larissa |
+| PRD-ESCOPO-03 | `docs/PRD.md` | Restrição | Fora de escopo: rate limiting de envio ao cliente | TRANSCRICAO | [09:38]-[09:39] Diego/Larissa |
+| PRD-ESCOPO-04 | `docs/PRD.md` | Restrição | Fora de escopo: garantia de ordering global entre pedidos diferentes | TRANSCRICAO | [09:12]-[09:13] Diego/Larissa |
+| PRD-ESCOPO-05 | `docs/PRD.md` | Restrição | Fora de escopo: arquivamento automático de eventos entregues na outbox | TRANSCRICAO | [09:08] Diego |
+| PRD-FR-01 | `docs/PRD.md` | Requisito Funcional | Cadastro de webhook (`POST`), secret gerada e devolvida na criação | TRANSCRICAO | [09:31] Marcos |
+| PRD-FR-02 | `docs/PRD.md` | Requisito Funcional | Cadastro autenticado por JWT do sistema; `customer_id` explícito, não inferido do token | TRANSCRICAO | [09:32] Bruno/Marcos/Larissa |
+| PRD-FR-03 | `docs/PRD.md` | Requisito Funcional | Edição (`PATCH`) de webhook existente | TRANSCRICAO | [09:33] Bruno |
+| PRD-FR-04 | `docs/PRD.md` | Requisito Funcional | Remoção (`DELETE`) de webhook | TRANSCRICAO | [09:33] Bruno |
+| PRD-FR-05 | `docs/PRD.md` | Requisito Funcional | Listagem (`GET`) de webhooks de um customer | TRANSCRICAO | [09:33] Bruno |
+| PRD-FR-06 | `docs/PRD.md` | Requisito Funcional | Filtro de eventos por status, aplicado na inserção do evento | TRANSCRICAO | [09:33]-[09:34] Marcos/Bruno |
+| PRD-FR-07 | `docs/PRD.md` | Requisito Funcional | Consulta de histórico de entregas do webhook | TRANSCRICAO | [09:34]-[09:35] Marcos/Larissa |
+| PRD-FR-08 | `docs/PRD.md` | Requisito Funcional | Replay manual de DLQ por administrador, com auditoria | TRANSCRICAO | [09:18], [09:34]-[09:36] Diego/Sofia/Larissa |
+| PRD-FR-09 | `docs/PRD.md` | Requisito Funcional | Notificação entregue em até 10 segundos no cenário sem falhas | TRANSCRICAO | [09:02] Marcos |
+| PRD-FR-10 | `docs/PRD.md` | Requisito Funcional | Garantia transacional entre mudança de status e evento publicado | TRANSCRICAO | [09:40]-[09:41] Bruno/Diego |
+| PRD-FR-11 | `docs/PRD.md` | Requisito Funcional | Rotação de secret via API com grace period de 24h | TRANSCRICAO | [09:21]-[09:22] Sofia |
+| PRD-FR-12 | `docs/PRD.md` | Requisito Funcional | Entrega assinada (HMAC-SHA256) com headers de identificação | TRANSCRICAO | [09:19]-[09:20], [09:25], [09:44]-[09:45] Sofia/Diego |
+| PRD-NFR-01 | `docs/PRD.md` | Requisito Não Funcional | Latência P95 < 10s; piso de 2s pelo polling do worker | TRANSCRICAO | [09:02] Marcos, [09:10] Larissa |
+| PRD-NFR-02 | `docs/PRD.md` | Requisito Não Funcional | URL de webhook obrigatoriamente HTTPS | TRANSCRICAO | [09:23] Sofia |
+| PRD-NFR-03 | `docs/PRD.md` | Requisito Não Funcional | HMAC-SHA256, secret por endpoint, rotação com grace period | TRANSCRICAO | [09:19]-[09:22] Sofia |
+| PRD-NFR-04 | `docs/PRD.md` | Requisito Não Funcional | Limite de payload de 64KB, rejeitado (não truncado) se exceder | TRANSCRICAO | [09:23]-[09:24] Sofia/Diego |
+| PRD-NFR-05 | `docs/PRD.md` | Requisito Não Funcional | Garantia de entrega at-least-once | TRANSCRICAO | [09:24]-[09:25] Diego |
+| PRD-NFR-06 | `docs/PRD.md` | Requisito Não Funcional | Retry com backoff exponencial, 5 tentativas | TRANSCRICAO | [09:15]-[09:17] Diego |
+| PRD-NFR-07 | `docs/PRD.md` | Requisito Não Funcional | Processamento de entrega isolado em processo separado da API | TRANSCRICAO | [09:11] Diego |
+| PRD-NFR-08 | `docs/PRD.md` | Requisito Não Funcional | Inserção do evento na mesma transação SQL da mudança de status | TRANSCRICAO | [09:06] Diego |
+| PRD-RISK-01 | `docs/PRD.md` | Risco | Atraso na entrega frente ao prazo comunicado à Atlas — risco de churn | TRANSCRICAO | [09:00] Marcos |
+| PRD-RISK-02 | `docs/PRD.md` | Risco | Revisão de segurança da Sofia como dependência de cronograma | TRANSCRICAO | [09:46]-[09:47] Sofia/Larissa |
+| PRD-DEP-01 | `docs/PRD.md` | Dependência | Documentação no portal do desenvolvedor a cargo do Marcos | TRANSCRICAO | [09:26], [09:40] Marcos |
+| PRD-DEP-02 | `docs/PRD.md` | Dependência | Confirmação de prazo com a Atlas condicionada à estimativa de sprints | TRANSCRICAO | [09:47] Marcos |
